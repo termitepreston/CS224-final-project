@@ -1,71 +1,132 @@
 package io.github.termitepreston.schoolprojects;
 
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.SwingUtilities;
+
+public class App {
+    private static final String TITLE = "CS224 Final Project - GridBagLayout Demo";
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> createAndShowFrame());
+    }
+
+    private static void createAndShowFrame() {
+        Data appData = new Data();
+        MainFrame frame = new MainFrame(TITLE, appData);
+
+        frame.pack();
+        frame.setVisible(true);
+    }
+}
 
 /**
  * Hello world! (Swing style)
  *
  */
-public class App {
-    private static final String TITLE = "CS224 Final Project!";
 
-    private static void createAndShowFrame() {
-        // so this thing is called only once.
-        System.out.println("App.createAndShowFrame()");
-        JFrame frame = new JFrame(TITLE);
-        var pane = frame.getContentPane();
+class Data {
+    private int count = 0;
 
-        pane.setLayout(new BoxLayout(pane, BoxLayout.Y_AXIS));
-
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        JMenuBar menuBar = new JMenuBar();
-        JMenu c = new JMenu("File");
-        c.add(new JMenuItem("Quit"));
-
-        menuBar.add(c);
-
-        class Model {
-            private int clickCount = 0;
-
-            public int getClickCount() {
-                return clickCount;
-            }
-
-            public void setClickCount(int clickCount) {
-                this.clickCount = clickCount;
-            }
-
-        }
-
-        var m = new Model();
-
-        JLabel label = new JLabel("Hello, world");
-        JButton btn = new JButton("A Button!");
-        btn.addActionListener(e -> {
-            m.setClickCount(m.getClickCount() + 1);
-            label.setText(String.format("total: %d", m.getClickCount()));
-        });
-
-        frame.setJMenuBar(menuBar);
-
-        pane.add(label);
-        pane.add(btn);
-
-        frame.setMinimumSize(new Dimension(300, 300));
-        frame.pack();
-        frame.setVisible(true);
+    public Data() {
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> createAndShowFrame());
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
+
+    public void increment() {
+        count++;
+    }
+
+    public void reset() {
+        count = 0;
+    }
+}
+
+class MainFrame extends JFrame {
+    private Data data;
+    private JLabel counterLabel;
+    private JButton counterButton;
+    private JButton resetButton;
+
+    public MainFrame(String title, Data data) {
+        super(title);
+
+        this.data = data;
+
+        counterLabel = new JLabel("Click to Count!");
+        counterLabel.setFont(new Font("Inter", Font.BOLD, 32));
+
+        counterButton = new JButton("COUNT!");
+        resetButton = new JButton("RESET!");
+
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setPreferredSize(new Dimension(360, 540));
+        buildUI();
+    }
+
+    public JLabel getCounterLabel() {
+        return counterLabel;
+    }
+
+    public void setCounterLabel(JLabel counterLabel) {
+        this.counterLabel = counterLabel;
+    }
+
+    public JButton getCounterButton() {
+        return counterButton;
+    }
+
+    public void setCounterButton(JButton counterButton) {
+        this.counterButton = counterButton;
+    }
+
+    private void buildUI() {
+        var pane = getContentPane();
+
+        pane.setLayout(new GridBagLayout());
+
+        var c = new GridBagConstraints();
+
+        c.weighty = 0.8;
+        // c.anchor = GridBagConstraints.CENTER;
+        c.gridx = 0;
+        c.gridy = 0;
+        c.gridwidth = GridBagConstraints.REMAINDER;
+        pane.add(counterLabel, c);
+
+        c.gridx = 0;
+        c.gridy = 1;
+        c.weightx = 0.5;
+        c.anchor = GridBagConstraints.LINE_START;
+        // ActionListener is a "Functional Interface"
+        counterButton.addActionListener(e -> {
+            data.increment();
+
+            counterLabel.setText(String.format("Count: %d", data.getCount()));
+        });
+        pane.add(counterButton, c);
+
+        c.gridx = 1;
+        c.gridy = 1;
+        c.weightx = 0.5;
+        c.anchor = GridBagConstraints.LINE_END;
+        resetButton.addActionListener(e -> {
+            data.reset();
+
+            counterLabel.setText("Click to COUNT!");
+        });
+        pane.add(resetButton, c);
     }
 }
