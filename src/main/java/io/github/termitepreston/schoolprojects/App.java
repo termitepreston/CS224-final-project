@@ -8,7 +8,9 @@ import java.awt.GridBagLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 
 public class App {
     private static final String TITLE = "CS224 Final Project - GridBagLayout Demo";
@@ -72,7 +74,8 @@ class MainFrame extends JFrame {
         resetButton = new JButton("RESET!");
 
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setPreferredSize(new Dimension(360, 540));
+        setPreferredSize(new Dimension(280, 360));
+        setResizable(false);
         buildUI();
     }
 
@@ -99,6 +102,8 @@ class MainFrame extends JFrame {
 
         var c = new GridBagConstraints();
 
+        var buttons = new JPanel();
+
         c.weighty = 0.8;
         // c.anchor = GridBagConstraints.CENTER;
         c.gridx = 0;
@@ -106,27 +111,55 @@ class MainFrame extends JFrame {
         c.gridwidth = GridBagConstraints.REMAINDER;
         pane.add(counterLabel, c);
 
-        c.gridx = 0;
-        c.gridy = 1;
-        c.weightx = 0.5;
-        c.anchor = GridBagConstraints.LINE_START;
         // ActionListener is a "Functional Interface"
         counterButton.addActionListener(e -> {
             data.increment();
 
             counterLabel.setText(String.format("Count: %d", data.getCount()));
-        });
-        pane.add(counterButton, c);
+            System.out.printf("Is this lambda being executed on the event dispatch theads? %s\n",
+                    SwingUtilities.isEventDispatchThread() ? "YES" : "NO");
 
-        c.gridx = 1;
-        c.gridy = 1;
-        c.weightx = 0.5;
-        c.anchor = GridBagConstraints.LINE_END;
+        });
+        buttons.add(counterButton);
+
+        var swingWorker = new SwingWorker<String[], Void>() {
+
+            @Override
+            protected String[] doInBackground() throws Exception {
+                // TODO Auto-generated method stub
+                throw new UnsupportedOperationException("Unimplemented method 'doInBackground'");
+            }
+
+        };
+
+        // Experiment (mutate ui state from a non-edt)
+        (new Thread(() -> {
+            while (true) {
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
+
+                counterLabel.setText(String.format("Reset from another thread",
+                        data.getCount()));
+
+                System.out.printf("Is this lambda being executed on the event dispatch theads? %s\n",
+                        SwingUtilities.isEventDispatchThread() ? "YES" : "NO");
+            }
+
+        })).start();
+
         resetButton.addActionListener(e -> {
             data.reset();
 
             counterLabel.setText("Click to COUNT!");
         });
-        pane.add(resetButton, c);
+        buttons.add(resetButton);
+
+        // Add the buttons to the gridbaglayout.
+        c.gridx = 0;
+        c.gridy = 1;
+        pane.add(buttons, c);
     }
 }
