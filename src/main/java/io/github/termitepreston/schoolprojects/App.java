@@ -4,6 +4,10 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -12,19 +16,42 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
+import io.github.termitepreston.schoolprojects.ui.SortAndReduce;
+
 public class App {
     private static final String TITLE = "CS224 Final Project - GridBagLayout Demo";
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> createAndShowFrame());
+    public static void main(String[] args) throws SQLException {
+        // SwingUtilities.invokeLater(() -> createAndShowFrame());
+        dbTest();
     }
 
     private static void createAndShowFrame() {
-        Data appData = new Data();
-        MainFrame frame = new MainFrame(TITLE, appData);
+        SortAndReduce frame = new SortAndReduce(TITLE);
 
         frame.pack();
         frame.setVisible(true);
+    }
+
+    private static void dbTest() throws SQLException {
+        var conn = getConn();
+
+        var statStr = "select * from greetings";
+
+        var stat = conn.createStatement();
+
+        stat.executeQuery(statStr);
+
+        try (ResultSet rs = stat.getResultSet()) {
+            while (rs.next()) {
+                System.out.println(rs.getString(2));
+            }
+        }
+    }
+
+    private static Connection getConn() throws SQLException {
+        return DriverManager
+                .getConnection("jdbc:sqlserver://localhost;encrypt=false;user=app;password=app;databaseName=project");
     }
 }
 

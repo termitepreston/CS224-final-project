@@ -37,7 +37,6 @@
       <artifactId>liquibase-core</artifactId>
       <version>4.23.0</version>
     </dependency>
-
   </dependencies>
 
   <build>
@@ -86,6 +85,15 @@
           <artifactId>maven-project-info-reports-plugin</artifactId>
           <version>3.0.0</version>
         </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>exec-maven-plugin</artifactId>
+          <version>3.1.0</version>
+          <configuration>
+            <mainClass>io.github.termitepreston.schoolprojects.App</mainClass>
+          </configuration>
+        </plugin>
+
       </plugins>
     </pluginManagement>
   </build>
