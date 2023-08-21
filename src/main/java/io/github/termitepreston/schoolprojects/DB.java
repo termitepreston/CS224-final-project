@@ -26,18 +26,15 @@ public class DB {
         migrate();
     }
 
-    public Config getConfig() {
-        return config;
-    }
 
     private void migrate() throws Exception {
-        Map<String, Object> config = new HashMap<>();
+        Map<String, Object> lbConfig = new HashMap<>();
 
-        Scope.child(config, () -> {
-            try (Connection conn = connect()) {
+        Scope.child(lbConfig, () -> {
+            try (Connection conn = connection()) {
                 Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(conn));
 
-                Liquibase liquibase = new liquibase.Liquibase("schema/changelog-master.xml", new ClassLoaderResourceAccessor(), database);
+                Liquibase liquibase = new liquibase.Liquibase(config.get("migration-master-changelog"), new ClassLoaderResourceAccessor(), database);
 
                 CommandScope updateCommand = new CommandScope(UpdateCommandStep.COMMAND_NAME);
 
@@ -48,7 +45,7 @@ public class DB {
         });
     }
 
-    private Connection connect() throws SQLException {
+    public Connection connection() throws SQLException {
         Properties dbProps = new Properties();
 
         dbProps.setProperty("user", config.get("db-user"));

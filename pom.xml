@@ -40,6 +40,12 @@
             <artifactId>liquibase-core</artifactId>
             <version>4.23.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>3.2</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -96,6 +102,7 @@
                         <mainClass>io.github.termitepreston.schoolprojects.App</mainClass>
                     </configuration>
                 </plugin>
+
 
             </plugins>
         </pluginManagement>
