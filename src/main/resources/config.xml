@@ -3,6 +3,5 @@
 <properties>
     <entry key="db-url">jdbc:postgresql://localhost/project</entry>
     <entry key="db-user">postgres</entry>
-    <entry key="db-password">app</entry>
-    <entry key="migration-master-changelog">schema/changelog-master.xml</entry>
+    <entry key="db-password">appa</entry>
 </properties>

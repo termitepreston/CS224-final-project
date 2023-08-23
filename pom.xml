@@ -34,13 +34,6 @@
         </dependency>
 
 
-        <!-- https://mvnrepository.com/artifact/org.liquibase/liquibase-core -->
-        <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
-            <version>4.23.0</version>
-        </dependency>
-
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf</artifactId>
@@ -99,7 +92,7 @@
                     <artifactId>exec-maven-plugin</artifactId>
                     <version>3.1.0</version>
                     <configuration>
-                        <mainClass>io.github.termitepreston.schoolprojects.App</mainClass>
+                        <mainClass>io.github.termitepreston.schoolprojects.Main</mainClass>
                     </configuration>
                 </plugin>
 

@@ -19,7 +19,8 @@ public class Config {
         }
     }
 
-    public String get(String key) {
-        return appConfig.getProperty(key);
+    public Properties getAppConfig() {
+        return appConfig;
     }
+
 }

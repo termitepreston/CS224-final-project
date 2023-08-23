@@ -2,11 +2,11 @@ package io.github.termitepreston.schoolprojects;
 
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
-import io.github.termitepreston.schoolprojects.ui.SortAndReduce;
+import io.github.termitepreston.schoolprojects.ui.ApplicationFrame;
 
 import javax.swing.*;
 
-public class App {
+public class Main {
     private static final String TITLE = "CS224 Final Project - GridBagLayout Demo";
 
     public static void main(String[] args) throws Exception {
@@ -18,14 +18,8 @@ public class App {
 
         FlatMacDarkLaf.setup();
 
-        SwingUtilities.invokeLater(App::createAndShowFrame);
+        SwingUtilities.invokeLater(() -> {
+            new ApplicationFrame(TITLE, db);
+        });
     }
-
-    private static void createAndShowFrame() {
-        var frame = new SortAndReduce(TITLE);
-
-        frame.pack();
-        frame.setVisible(true);
-    }
-
 }
