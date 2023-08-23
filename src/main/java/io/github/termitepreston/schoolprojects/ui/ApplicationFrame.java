@@ -35,10 +35,12 @@ public class ApplicationFrame extends JFrame implements PropertyChangeListener, 
 
         buildMenuBar();
 
-        checkDBConn();
+        // checkDBConn();
 
         pack();
         setVisible(true);
+
+        new AuthDialog(this, db);
     }
 
     private void buildMenuBar() {
