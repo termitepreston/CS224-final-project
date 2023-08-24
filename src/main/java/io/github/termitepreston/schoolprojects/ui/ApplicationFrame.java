@@ -1,6 +1,7 @@
 package io.github.termitepreston.schoolprojects.ui;
 
 import io.github.termitepreston.schoolprojects.DB;
+import io.github.termitepreston.schoolprojects.model.User;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,21 +14,21 @@ import java.beans.PropertyChangeListener;
 
 public class ApplicationFrame extends JFrame implements PropertyChangeListener, ActionListener {
     private final DB db;
+    JMenu fileMenu, helpMenu;
+    JMenuItem quitMenuItem, aboutMenuItem;
+
     /*
     Main application window menu elements.
      */
     JMenuBar menuBar;
-    JMenu fileMenu, helpMenu;
-    JMenuItem quitMenuItem, aboutMenuItem;
-
-    private ProgressMonitor progressMonitor;
-    private DBConnTestWorker worker;
-
+    private User currentUser;
 
     public ApplicationFrame(String title, DB db) {
         super(title);
 
         this.db = db;
+
+        addPropertyChangeListener(this);
 
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -35,12 +36,23 @@ public class ApplicationFrame extends JFrame implements PropertyChangeListener, 
 
         buildMenuBar();
 
-        // checkDBConn();
-
         pack();
         setVisible(true);
 
-        new AuthDialog(this, db);
+        showAuthDialog();
+
+    }
+
+    public User getCurrentUser() {
+        return currentUser;
+    }
+
+    public void setCurrentUser(User currentUser) {
+        User oldUser = this.currentUser;
+
+        this.currentUser = currentUser;
+
+        firePropertyChange("currentUser", currentUser, oldUser);
     }
 
     private void buildMenuBar() {
@@ -71,41 +83,35 @@ public class ApplicationFrame extends JFrame implements PropertyChangeListener, 
         setJMenuBar(menuBar);
     }
 
-    public ProgressMonitor getProgressMonitor() {
-        return progressMonitor;
-    }
+    private void buildUI() {
+        var pane = getContentPane();
 
-    public void setProgressMonitor(ProgressMonitor progressMonitor) {
-        this.progressMonitor = progressMonitor;
-    }
+        pane.setLayout(new GridBagLayout());
 
-    private void checkDBConn() {
-        progressMonitor = new ProgressMonitor(this, "Connecting to a DB...",
-                "", 0, 100);
+        var c = new GridBagConstraints();
 
-        progressMonitor.setProgress(0);
-        worker = new DBConnTestWorker(db, this);
-        worker.addPropertyChangeListener(this);
+        c.gridx = 0;
+        c.gridy = 0;
+        c.anchor = GridBagConstraints.CENTER;
+        c.fill = GridBagConstraints.BOTH;
 
-        worker.execute();
-    }
+        var welcomeLabel = new JLabel();
+        welcomeLabel.setFont(UIManager.getFont("h1.font"));
 
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        if ("progress".equals(evt.getPropertyName())) {
-            int progress = (Integer) evt.getNewValue();
-            progressMonitor.setProgress(progress);
-            String message =
-                    String.format("Completed %d%%.\n", progress);
-            progressMonitor.setNote(message);
-            if (progressMonitor.isCanceled() || worker.isDone()) {
-                Toolkit.getDefaultToolkit().beep();
-                if (progressMonitor.isCanceled()) {
-                    worker.cancel(true);
-                }
-            }
+        if (currentUser != null && currentUser.isAdmin()) {
+            welcomeLabel.setText("Welcome, admin!");
+        } else {
+            welcomeLabel.setText("Welcome, user!");
         }
+
+        pane.add(welcomeLabel, c);
+        pack();
     }
+
+    private void showAuthDialog() {
+        new AuthDialog(this, db);
+    }
+
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -131,6 +137,13 @@ public class ApplicationFrame extends JFrame implements PropertyChangeListener, 
 
             if (n == 0)
                 dispose();
+        }
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (evt.getPropertyName().equals("currentUser")) {
+            buildUI();
         }
     }
 }

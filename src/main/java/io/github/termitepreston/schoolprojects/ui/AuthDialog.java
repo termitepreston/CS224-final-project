@@ -2,6 +2,7 @@ package io.github.termitepreston.schoolprojects.ui;
 
 import io.github.termitepreston.schoolprojects.DB;
 import io.github.termitepreston.schoolprojects.model.User;
+import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -9,16 +10,17 @@ import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.concurrent.ExecutionException;
 
 public class AuthDialog extends JDialog implements ActionListener, DocumentListener {
-    private final JFrame parent;
+    private final ApplicationFrame parent;
     private final DB db;
     private JTextField usernameInput, passwordInput;
     private JButton signInBtn, cancelBtn;
 
     private JLabel feedbackLabel;
 
-    public AuthDialog(JFrame parent, DB db) {
+    public AuthDialog(ApplicationFrame parent, DB db) {
         super(parent);
 
         this.parent = parent;
@@ -30,7 +32,7 @@ public class AuthDialog extends JDialog implements ActionListener, DocumentListe
     private void buildUI() {
         setTitle("Sign in...");
 
-        setLayout(new GridBagLayout());
+        setLayout(new MigLayout());
 
         GridBagConstraints c = new GridBagConstraints();
 
@@ -39,19 +41,28 @@ public class AuthDialog extends JDialog implements ActionListener, DocumentListe
         c.gridy = 0;
         c.gridwidth = 2;
         c.gridheight = 1;
-        c.fill = GridBagConstraints.HORIZONTAL;
+        c.fill = GridBagConstraints.NONE;
         c.weightx = 1;
         c.insets = new Insets(12, 12, 12, 12);
         c.anchor = GridBagConstraints.FIRST_LINE_START;
 
         // description
-        add(new JLabel("Enter username and password to log in"), c);
+        var descLabel = new JLabel("""
+                <html>
+                <p>
+                Enter appropriate username and password<br/>
+                to access ADMIN console or press cancel<br/>
+                to browse movies.
+                </p>
+                </html>
+                """);
+        descLabel.setFont(UIManager.getFont("h2.font"));
+        add(descLabel, c);
 
         // feedback
         feedbackLabel = new JLabel("Make sure username password combination is correct!");
         c.gridy = 1;
         c.anchor = GridBagConstraints.CENTER;
-        c.fill = GridBagConstraints.NONE;
         add(feedbackLabel, c);
 
 
@@ -131,14 +142,13 @@ public class AuthDialog extends JDialog implements ActionListener, DocumentListe
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == cancelBtn) {
-            parent.dispose();
+            parent.setCurrentUser(null);
+            dispose();
         }
 
         if (e.getSource() == signInBtn) {
             String username = usernameInput.getText();
             String password = passwordInput.getText();
-
-            System.out.println("password = " + password);
 
             signInBtn.setEnabled(false);
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -146,42 +156,33 @@ public class AuthDialog extends JDialog implements ActionListener, DocumentListe
             (new SwingWorker<User, Void>() {
 
                 @Override
-                public User doInBackground() throws Exception {
+                protected User doInBackground() throws Exception {
                     User user = new User(db);
 
-                    System.out.println("user = " + user);
+                    user.login(username, password);
 
-                    try {
-                        user.login(username, password);
-
-                        System.out.println("user[after login] = " + user);
-
-                        return user;
-                    } catch (Exception e) {
-                        return null;
-                    }
+                    return user;
                 }
 
                 @Override
-                public void done() {
+                protected void done() {
                     try {
                         User user = get();
 
-                        if (user == null) {
-                            feedbackLabel.setText("failed to find user!");
-
-                            signInBtn.setEnabled(true);
-                            setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-
-                            return;
-                        }
 
                         feedbackLabel.setText(String.format("Welcome, %s", user.getUsername()));
+                        setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+                        parent.setCurrentUser(user);
+                        dispose();
+
+                    } catch (ExecutionException e) {
+                        feedbackLabel.setText(String.format("Failed! reason: %s", e.getMessage()));
+
                         signInBtn.setEnabled(true);
                         setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 
-                    } catch (Exception e) {
-
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
                 }
             }).execute();

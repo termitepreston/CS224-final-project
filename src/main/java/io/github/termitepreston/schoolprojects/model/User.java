@@ -5,6 +5,7 @@ import io.github.termitepreston.schoolprojects.DB;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Objects;
 
 public class User {
@@ -33,7 +34,7 @@ public class User {
                 '}';
     }
 
-    public void login(String username, String password) throws Exception {
+    public void login(String username, String password) throws UserNotFoundException, SQLException {
         try (Connection conn = db.getConn()) {
             PreparedStatement stat = conn.prepareStatement(selectUsersQuery);
 
@@ -47,17 +48,16 @@ public class User {
                     dbPass = rs.getString(2);
                 }
 
-
-                System.out.println("dbPass = " + dbPass);
-
                 if (!Objects.equals(dbPass, password))
-                    throw new Exception("Password is incorrect!");
+                    throw new UserNotFoundException("Password is incorrect!");
 
                 this.username = username;
             }
 
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
         }
+    }
+
+    public boolean isAdmin() {
+        return username.equals("admin");
     }
 }
