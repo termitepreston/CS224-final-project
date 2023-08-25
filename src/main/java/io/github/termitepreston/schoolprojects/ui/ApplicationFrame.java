@@ -11,6 +11,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.security.Principal;
 
 public class ApplicationFrame extends JFrame implements PropertyChangeListener, ActionListener {
     private final DB db;
@@ -21,7 +22,7 @@ public class ApplicationFrame extends JFrame implements PropertyChangeListener, 
     Main application window menu elements.
      */
     JMenuBar menuBar;
-    private User currentUser;
+    private Principal currentUser;
 
     public ApplicationFrame(String title, DB db) {
         super(title);
@@ -43,12 +44,12 @@ public class ApplicationFrame extends JFrame implements PropertyChangeListener, 
 
     }
 
-    public User getCurrentUser() {
+    public Principal getCurrentUser() {
         return currentUser;
     }
 
-    public void setCurrentUser(User currentUser) {
-        User oldUser = this.currentUser;
+    public void setCurrentUser(Principal currentUser) {
+        Principal oldUser = this.currentUser;
 
         this.currentUser = currentUser;
 
@@ -98,7 +99,7 @@ public class ApplicationFrame extends JFrame implements PropertyChangeListener, 
         var welcomeLabel = new JLabel();
         welcomeLabel.setFont(UIManager.getFont("h1.font"));
 
-        if (currentUser != null && currentUser.isAdmin()) {
+        if (currentUser != null && User.isAdmin(currentUser)) {
             welcomeLabel.setText("Welcome, admin!");
         } else {
             welcomeLabel.setText("Welcome, user!");

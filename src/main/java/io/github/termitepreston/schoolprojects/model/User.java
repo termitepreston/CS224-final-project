@@ -2,13 +2,14 @@ package io.github.termitepreston.schoolprojects.model;
 
 import io.github.termitepreston.schoolprojects.DB;
 
+import java.security.Principal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Objects;
 
-public class User {
+public class User implements Principal {
     private static final String selectUsersQuery = """
             select
                 username, password
@@ -23,6 +24,10 @@ public class User {
         this.db = db;
     }
 
+    public static boolean isAdmin(Principal principal) {
+        return principal.getName().equals("admin");
+    }
+
     public String getUsername() {
         return username;
     }
@@ -34,7 +39,12 @@ public class User {
                 '}';
     }
 
-    public void login(String username, String password) throws UserNotFoundException, SQLException {
+    @Override
+    public String getName() {
+        return username;
+    }
+
+    public void login(String username, String password) throws UserNotFoundException, SQLException, WrongPasswordException {
         try (Connection conn = db.getConn()) {
             PreparedStatement stat = conn.prepareStatement(selectUsersQuery);
 
@@ -48,16 +58,15 @@ public class User {
                     dbPass = rs.getString(2);
                 }
 
+                if (dbPass == null)
+                    throw new UserNotFoundException("User " + username + " not found!");
+
                 if (!Objects.equals(dbPass, password))
-                    throw new UserNotFoundException("Password is incorrect!");
+                    throw new WrongPasswordException("Incorrect password entered!");
 
                 this.username = username;
             }
 
         }
-    }
-
-    public boolean isAdmin() {
-        return username.equals("admin");
     }
 }
