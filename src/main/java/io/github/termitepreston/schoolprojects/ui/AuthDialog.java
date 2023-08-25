@@ -32,110 +32,77 @@ public class AuthDialog extends JDialog implements ActionListener, DocumentListe
     private void buildUI() {
         setTitle("Sign in...");
 
-        setLayout(new MigLayout());
+        setLayout(new MigLayout("insets 16",
+                "[left][right]",
+                "8[]16[]16[]16[]16[]8"));
 
-        GridBagConstraints c = new GridBagConstraints();
-
-        // description
-        c.gridx = 0;
-        c.gridy = 0;
-        c.gridwidth = 2;
-        c.gridheight = 1;
-        c.fill = GridBagConstraints.NONE;
-        c.weightx = 1;
-        c.insets = new Insets(12, 12, 12, 12);
-        c.anchor = GridBagConstraints.FIRST_LINE_START;
 
         // description
+
         var descLabel = new JLabel("""
                 <html>
                 <p>
-                Enter appropriate username and password<br/>
-                to access ADMIN console or press cancel<br/>
+                Enter appropriate username and password
+                to access ADMIN console or press cancel
                 to browse movies.
                 </p>
                 </html>
                 """);
         descLabel.setFont(UIManager.getFont("h2.font"));
-        add(descLabel, c);
+        add(descLabel, "w 300!, h 100!, wrap, span, align center");
 
         // feedback
-        feedbackLabel = new JLabel("Make sure username password combination is correct!");
-        c.gridy = 1;
-        c.anchor = GridBagConstraints.CENTER;
-        add(feedbackLabel, c);
+        feedbackLabel = new JLabel("<html>Make sure username password combination is correct!</html>");
+        add(feedbackLabel, "wrap, span, align center");
 
 
         // username field
         // username entry
-        JPanel usernameField = new JPanel();
         JLabel usernameLabel = new JLabel("Username");
         usernameLabel.setAlignmentX(LEFT_ALIGNMENT);
         int inputWidth = 20;
         usernameInput = new JTextField(inputWidth);
         usernameInput.setAlignmentX(LEFT_ALIGNMENT);
-        usernameField.setLayout(new BoxLayout(usernameField, BoxLayout.PAGE_AXIS));
-        usernameField.add(usernameLabel);
-        usernameField.add(Box.createRigidArea(new Dimension(0, 4)));
-        usernameField.add(usernameInput);
 
         // event stuff
         usernameInput.getDocument().addDocumentListener(this);
 
         // layout
-        c.gridy = 2;
-        c.insets = new Insets(12, 12, 12, 12);
-        c.fill = GridBagConstraints.HORIZONTAL;
-        add(usernameField, c);
+        add(usernameLabel);
+        add(usernameInput, "wrap, grow");
 
         // password field.
-        JPanel passwordField = new JPanel();
         JLabel passwordLabel = new JLabel("Password");
         passwordLabel.setAlignmentX(LEFT_ALIGNMENT);
         passwordInput = new JPasswordField(inputWidth);
         passwordInput.setAlignmentX(LEFT_ALIGNMENT);
-        passwordField.setLayout(new BoxLayout(passwordField, BoxLayout.PAGE_AXIS));
-        passwordField.add(passwordLabel);
-        passwordField.add(Box.createRigidArea(new Dimension(0, 4)));
-        passwordField.add(passwordInput);
 
         // event
         passwordInput.getDocument().addDocumentListener(this);
-
-
         // layout
-        c.gridy = 3;
-        add(passwordField, c);
+        add(passwordLabel);
+        add(passwordInput, "wrap, grow");
 
         // sign in button
         signInBtn = new JButton("Sign in...");
-        c.gridy = 4;
-        c.gridx = 0;
-        c.gridwidth = 1;
-        c.anchor = GridBagConstraints.LINE_START;
-        c.ipady = 2;
-        c.fill = GridBagConstraints.NONE;
-        c.weightx = 0;
 
         // event stuff
         signInBtn.setEnabled(false);
         signInBtn.addActionListener(this);
 
-        add(signInBtn, c);
+        add(signInBtn);
 
         // cancel button
         cancelBtn = new JButton("Cancel");
-        c.gridx = 1;
-        c.anchor = GridBagConstraints.LINE_END;
-        c.weightx = 0;
-        add(cancelBtn, c);
 
         // evt handling
         cancelBtn.addActionListener(this);
 
-        pack();
+        add(cancelBtn);
+
         setResizable(false);
         setModal(true);
+        pack();
         setVisible(true);
     }
 
@@ -176,7 +143,7 @@ public class AuthDialog extends JDialog implements ActionListener, DocumentListe
                         dispose();
 
                     } catch (ExecutionException e) {
-                        feedbackLabel.setText(String.format("Failed! reason: %s", e.getMessage()));
+                        feedbackLabel.setText(String.format("<html>Failed! reason: %s</html>", e.getCause().getMessage()));
 
                         signInBtn.setEnabled(true);
                         setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
