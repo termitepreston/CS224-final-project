@@ -15,13 +15,19 @@ import java.security.Principal;
 
 public class ApplicationFrame extends JFrame implements PropertyChangeListener, ActionListener {
     private final DB db;
-    JMenu fileMenu, helpMenu;
-    JMenuItem quitMenuItem, aboutMenuItem;
+    private JMenu fileMenu, helpMenu;
+
+    // common menu items...
+    private JMenuItem quitMenuItem, aboutMenuItem;
+
+    // admin menu items
+    private JMenu newMenu;
+    private JMenuItem newMovieMenuItem;
 
     /*
     Main application window menu elements.
      */
-    JMenuBar menuBar;
+    private JMenuBar menuBar;
     private Principal currentUser;
 
     public ApplicationFrame(String title, DB db) {
@@ -35,7 +41,7 @@ public class ApplicationFrame extends JFrame implements PropertyChangeListener, 
 
         setPreferredSize(new Dimension(400, 400));
 
-        buildMenuBar();
+        buildCommonMenuBar();
 
         pack();
         setVisible(true);
@@ -56,19 +62,24 @@ public class ApplicationFrame extends JFrame implements PropertyChangeListener, 
         firePropertyChange("currentUser", currentUser, oldUser);
     }
 
-    private void buildMenuBar() {
+    private void buildAdminMenuBar() {
+        newMenu = new JMenu("New...");
+        newMenu.setMnemonic(KeyEvent.VK_E);
+        fileMenu.add(newMenu);
+
+        newMovieMenuItem = new JMenuItem("Movie");
+        newMovieMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK));
+        newMovieMenuItem.addActionListener(this);
+        newMenu.add(newMovieMenuItem);
+    }
+
+    private void buildCommonMenuBar() {
         menuBar = new JMenuBar();
 
         // File menu
         fileMenu = new JMenu("File");
         fileMenu.setMnemonic(KeyEvent.VK_F);
         menuBar.add(fileMenu);
-
-        // File > Quit menu item.
-        quitMenuItem = new JMenuItem("Quit", KeyEvent.VK_Q);
-        quitMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK));
-        quitMenuItem.addActionListener(this);
-        fileMenu.add(quitMenuItem);
 
         // Help menu
         helpMenu = new JMenu("Help");
@@ -82,6 +93,15 @@ public class ApplicationFrame extends JFrame implements PropertyChangeListener, 
         helpMenu.add(aboutMenuItem);
 
         setJMenuBar(menuBar);
+    }
+
+    private void addQuitMenuItem() {
+        // File > Quit menu item.
+        quitMenuItem = new JMenuItem("Quit", KeyEvent.VK_Q);
+        quitMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK));
+        quitMenuItem.addActionListener(this);
+        fileMenu.add(quitMenuItem);
+
     }
 
     private void buildUI() {
@@ -100,10 +120,13 @@ public class ApplicationFrame extends JFrame implements PropertyChangeListener, 
         welcomeLabel.setFont(UIManager.getFont("h1.font"));
 
         if (currentUser != null && User.isAdmin(currentUser)) {
+            buildAdminMenuBar();
             welcomeLabel.setText("Welcome, admin!");
         } else {
             welcomeLabel.setText("Welcome, user!");
         }
+
+        addQuitMenuItem();
 
         pane.add(welcomeLabel, c);
         pack();
@@ -138,6 +161,11 @@ public class ApplicationFrame extends JFrame implements PropertyChangeListener, 
 
             if (n == 0)
                 dispose();
+        }
+
+        if (e.getSource() == newMovieMenuItem) {
+            var newContentDialog = new NewContentDialog(db);
+            newContentDialog.setVisible(true);
         }
     }
 
