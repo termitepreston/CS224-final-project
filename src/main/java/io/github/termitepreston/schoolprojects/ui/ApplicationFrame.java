@@ -164,8 +164,8 @@ public class ApplicationFrame extends JFrame implements PropertyChangeListener, 
         }
 
         if (e.getSource() == newMovieMenuItem) {
-            var newContentDialog = new NewContentDialog(db);
-            newContentDialog.setVisible(true);
+            var newMovieDialog = new NewMovieDialog("New movie...", db, 10, 25);
+            newMovieDialog.setVisible(true);
         }
     }
 
