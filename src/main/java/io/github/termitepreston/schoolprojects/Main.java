@@ -7,7 +7,7 @@ import io.github.termitepreston.schoolprojects.ui.ApplicationFrame;
 import javax.swing.*;
 
 public class Main {
-    private static final String TITLE = "CS224 Final Project - GridBagLayout Demo";
+    private static final String TITLE = "CS224 Final Project - Movie Management System";
 
     public static void main(String[] args) throws Exception {
         Config config = new Config("config.xml");

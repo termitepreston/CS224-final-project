@@ -88,8 +88,10 @@
                     <url>jdbc:postgresql://localhost/project</url>
                     <user>postgres</user>
                     <password>app</password>
+                    <cleanDisabled>false</cleanDisabled>
                 </configuration>
             </plugin>
+
 
         </plugins>
     </build>

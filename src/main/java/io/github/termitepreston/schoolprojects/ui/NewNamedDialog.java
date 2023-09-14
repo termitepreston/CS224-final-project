@@ -1,7 +1,7 @@
 package io.github.termitepreston.schoolprojects.ui;
 
 import io.github.termitepreston.schoolprojects.DB;
-import io.github.termitepreston.schoolprojects.model.Person;
+import io.github.termitepreston.schoolprojects.model.Named;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -19,56 +19,51 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public class NewPersonDialog extends JDialog implements FocusListener, PropertyChangeListener {
+public class NewNamedDialog extends JDialog implements FocusListener, PropertyChangeListener {
     private final DB db;
     private final Status dataInsertStatus = Status.Idle;
     private final Insets fieldMargin = new Insets(20, 0, 0, 0);
     private final Insets labelMargin = new Insets(8, 0, 0, 0);
     private final Insets elementMargin = new Insets(4, 0, 0, 0);
     private final JLabel formTitleLabel = new JLabel();
-    private final JLabel firstNameLabel = new JLabel("First name");
-    private final JLabel firstNameHelperLabel = new JLabel("First name...");
-    private final JTextField firstNameTF;
-    private final JLabel firstNameErrorLabel = new JLabel("");
-    private final JLabel lastNameLabel = new JLabel("Last name");
-    private final JLabel lastNameHelperLabel = new JLabel("Last name...");
-    private final JTextField lastNameTF;
-    private final JLabel lastNameErrorLabel = new JLabel("");
+
+    private final JLabel nameLabel = new JLabel();
+    private final JLabel nameHelperLabel = new JLabel();
+    private final JTextField nameTF;
+    private final JLabel nameErrorLabel = new JLabel("");
     private final JButton submitBtn = new JButton();
     private final JPanel formContainer = new JPanel();
     private final HashMap<JComponent, Attribute> components = new HashMap<>();
-    private final BiFunction<Class<? extends Person>, Pair<String, String>, SwingWorker<Person, Void>> personInserter;
-    private final Class<? extends Person> clazz;
-    private Person person;
+    private final BiFunction<Class<? extends Named>, String, SwingWorker<Named, Void>> namedInserter;
+    private final Class<? extends Named> clazz;
+    private Named named;
 
-    public NewPersonDialog(DB db, Class<? extends Person> clazz, int cols) {
+    public NewNamedDialog(DB db, Class<? extends Named> clazz, int cols) {
         this.db = db;
         this.clazz = clazz;
-        firstNameTF = new JTextField(cols);
-        lastNameTF = new JTextField(cols);
-        setPreferredSize(new Dimension(384, 460));
+        nameTF = new JTextField(cols);
+        setPreferredSize(new Dimension(384, 360));
 
         formTitleLabel.setText("New %s".formatted(clazz.getSimpleName()));
         submitBtn.setText("Add %s...".formatted(clazz.getSimpleName().toLowerCase()));
+        nameLabel.setText("%s's name".formatted(clazz.getSimpleName()));
+        nameHelperLabel.setText("Name of the %s...".formatted(clazz.getSimpleName().toLowerCase()));
 
         // set the style of title labels.
         JLabel[] labels = {
-                firstNameLabel,
-                lastNameLabel,
+                nameLabel,
         };
         Arrays.stream(labels).forEach(l -> l.putClientProperty("FlatLaf.style", "font: $h2.regular.font"));
 
         // set the style of helpers
         JLabel[] helpers = {
-                firstNameHelperLabel,
-                lastNameHelperLabel,
+                nameHelperLabel,
         };
         Arrays.stream(helpers).forEach(h -> h.putClientProperty("FlatLaf.style", "font: $medium.font"));
 
         // set the style of error labels.
         JLabel[] errors = {
-                firstNameErrorLabel,
-                lastNameErrorLabel,
+                nameErrorLabel,
         };
         Arrays.stream(errors).forEach(e -> {
             e.putClientProperty("FlatLaf.style", "font: $defaultFont; foreground: #d93b3b");
@@ -76,26 +71,26 @@ public class NewPersonDialog extends JDialog implements FocusListener, PropertyC
 
         formTitleLabel.putClientProperty("FlatLaf.style", "font: $h1.font");
 
-        personInserter = (c, p) -> new SwingWorker<>() {
+        namedInserter = (c, name) -> new SwingWorker<>() {
             @Override
-            protected Person doInBackground() throws Exception {
-                return Person.insertOne(NewPersonDialog.this.db, c, p.first(), p.second());
+            protected Named doInBackground() throws Exception {
+                return Named.insertOne(NewNamedDialog.this.db, c, name);
             }
 
             @Override
             protected void done() {
                 try {
 
-                    setPerson(get());
+                    setNamed(get());
 
-                    JOptionPane.showMessageDialog(NewPersonDialog.this,
-                            "Added %s to database successfully!".formatted(person));
+                    JOptionPane.showMessageDialog(NewNamedDialog.this,
+                            "Added %s to database successfully!".formatted(named));
                     dispose();
 
                 } catch (ExecutionException | InterruptedException e) {
-                    setPerson(null);
+                    setNamed(null);
 
-                    JOptionPane.showMessageDialog(NewPersonDialog.this,
+                    JOptionPane.showMessageDialog(NewNamedDialog.this,
                             e.getCause().getMessage(),
                             "Error!",
                             JOptionPane.ERROR_MESSAGE);
@@ -117,8 +112,7 @@ public class NewPersonDialog extends JDialog implements FocusListener, PropertyC
             return false;
         }, prefix + " is required!");
 
-        components.put(firstNameTF, new Attribute(new Validator[]{required.apply("First name")}, firstNameLabel, firstNameHelperLabel, firstNameErrorLabel));
-        components.put(lastNameTF, new Attribute(new Validator[]{required.apply("Last name")}, lastNameLabel, lastNameHelperLabel, lastNameErrorLabel));
+        components.put(nameTF, new Attribute(new Validator[]{required.apply("Last name")}, nameLabel, nameHelperLabel, nameErrorLabel));
 
         submitBtn.setEnabled(false);
 
@@ -133,20 +127,20 @@ public class NewPersonDialog extends JDialog implements FocusListener, PropertyC
         wireUpUI();
     }
 
-    public static Person createPerson(DB db, Class<? extends Person> clazz) {
-        NewPersonDialog npd = new NewPersonDialog(db, clazz, 20);
+    public static Named createNamed(DB db, Class<? extends Named> clazz) {
+        NewNamedDialog nnd = new NewNamedDialog(db, clazz, 20);
 
-        npd.setVisible(true);
+        nnd.setVisible(true);
 
-        return npd.getPerson();
+        return nnd.getNamed();
     }
 
-    public Person getPerson() {
-        return person;
+    public Named getNamed() {
+        return named;
     }
 
-    public void setPerson(Person person) {
-        this.person = person;
+    public void setNamed(Named named) {
+        this.named = named;
     }
 
     private void buildUI() {
@@ -156,7 +150,7 @@ public class NewPersonDialog extends JDialog implements FocusListener, PropertyC
             case Idle -> {
                 c.gridx = 0;
                 c.gridy = 0;
-                c.anchor = GridBagConstraints.CENTER;
+                c.anchor = GridBagConstraints.FIRST_LINE_START;
 
                 // form container top margin:
                 c.insets = new Insets(32, 0, 0, 0);
@@ -164,32 +158,18 @@ public class NewPersonDialog extends JDialog implements FocusListener, PropertyC
                 formContainer.add(formTitleLabel, c);
 
 
-                // title
+                // name
                 c.insets = fieldMargin;
                 c.gridy++;
-                c.anchor = GridBagConstraints.FIRST_LINE_START;
-                formContainer.add(firstNameLabel, c);
+                formContainer.add(nameLabel, c);
                 c.insets = labelMargin;
                 c.gridy++;
-                formContainer.add(firstNameHelperLabel, c);
+                formContainer.add(nameHelperLabel, c);
                 c.insets = elementMargin;
                 c.gridy++;
-                formContainer.add(firstNameTF, c);
+                formContainer.add(nameTF, c);
                 c.gridy++;
-                formContainer.add(firstNameErrorLabel, c);
-
-                // runtime
-                c.insets = fieldMargin;
-                c.gridy++;
-                formContainer.add(lastNameLabel, c);
-                c.insets = labelMargin;
-                c.gridy++;
-                formContainer.add(lastNameHelperLabel, c);
-                c.insets = elementMargin;
-                c.gridy++;
-                formContainer.add(lastNameTF, c);
-                c.gridy++;
-                formContainer.add(lastNameErrorLabel, c);
+                formContainer.add(nameErrorLabel, c);
 
                 // submit button
                 c.gridy++;
@@ -232,7 +212,7 @@ public class NewPersonDialog extends JDialog implements FocusListener, PropertyC
         }
 
         submitBtn.addActionListener(e -> {
-            var inserter = personInserter.apply(clazz, new Pair<>(firstNameTF.getText(), lastNameTF.getText()));
+            var inserter = namedInserter.apply(clazz, nameTF.getText());
 
             inserter.execute();
         });

@@ -17,8 +17,7 @@ public class AuthDialog extends JDialog implements ActionListener, DocumentListe
     private final DB db;
     private JTextField usernameInput, passwordInput;
     private JButton signInBtn, cancelBtn;
-
-    private JLabel feedbackLabel;
+    private User user;
 
     public AuthDialog(ApplicationFrame parent, DB db) {
         super(parent);
@@ -26,7 +25,19 @@ public class AuthDialog extends JDialog implements ActionListener, DocumentListe
         this.parent = parent;
         this.db = db;
 
+        setModal(true);
+
         buildUI();
+    }
+
+    public static User login(ApplicationFrame parent, DB db) {
+        var ad = new AuthDialog(parent, db);
+
+        return ad.getUser();
+    }
+
+    public User getUser() {
+        return user;
     }
 
     private void buildUI() {
@@ -52,8 +63,7 @@ public class AuthDialog extends JDialog implements ActionListener, DocumentListe
         add(descLabel, "w 300!, h 100!, wrap, span, align center");
 
         // feedback
-        feedbackLabel = new JLabel("<html>Make sure username password combination is correct!</html>");
-        add(feedbackLabel, "wrap, span, align center");
+        add(new JLabel("<html>Make sure username password combination is correct!</html>"), "wrap, span, align center");
 
 
         // username field
@@ -109,7 +119,7 @@ public class AuthDialog extends JDialog implements ActionListener, DocumentListe
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == cancelBtn) {
-            parent.setCurrentUser(null);
+            user = null;
             dispose();
         }
 
@@ -134,22 +144,23 @@ public class AuthDialog extends JDialog implements ActionListener, DocumentListe
                 @Override
                 protected void done() {
                     try {
-                        User user = get();
+                        user = get();
 
+                        JOptionPane.showMessageDialog(AuthDialog.this,
+                                "Login successful!", "Success!", JOptionPane.INFORMATION_MESSAGE);
 
-                        feedbackLabel.setText(String.format("Welcome, %s", user.getUsername()));
-                        setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-                        parent.setCurrentUser(user);
                         dispose();
 
-                    } catch (ExecutionException e) {
-                        feedbackLabel.setText(String.format("<html>Failed! reason: %s</html>", e.getCause().getMessage()));
+                    } catch (ExecutionException | InterruptedException e) {
+                        user = null;
 
-                        signInBtn.setEnabled(true);
+                        JOptionPane.showMessageDialog(AuthDialog.this,
+                                e.getCause().getMessage(), "Fatal Error", JOptionPane.ERROR_MESSAGE);
+
+                        dispose();
+
+                    } finally {
                         setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
                     }
                 }
             }).execute();

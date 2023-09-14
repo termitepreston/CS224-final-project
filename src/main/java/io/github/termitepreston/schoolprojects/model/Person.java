@@ -57,13 +57,19 @@ public class Person {
                     (?, ?)
                 returning id;""".formatted(tableName);
 
+
         try (var conn = db.getConn();
-             var stat = conn.prepareStatement(insertStat);
-             var rs = stat.executeQuery()) {
+             var stat = conn.prepareStatement(insertStat)
+        ) {
 
-            rs.next();
+            stat.setString(1, firstName);
+            stat.setString(2, lastName);
 
-            return new Person(rs.getInt(1), firstName, lastName);
+            try (var rs = stat.executeQuery()) {
+                rs.next();
+
+                return new Person(rs.getInt(1), firstName, lastName);
+            }
         }
     }
 
