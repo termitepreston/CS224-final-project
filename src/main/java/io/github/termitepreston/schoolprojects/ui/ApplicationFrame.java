@@ -41,7 +41,7 @@ public class ApplicationFrame extends JFrame implements PropertyChangeListener, 
         this.db = db;
 
         tableModels = new HashMap<>();
-        tablesFetcher = new SwingWorker<>() {
+        tablesFetcher = new SwingWorker<>() {  // retriving
             @Override
             protected HashMap<Class<?>, ArrayList<?>> doInBackground() throws Exception {
                 var models = new HashMap<Class<?>, ArrayList<?>>();
@@ -308,7 +308,7 @@ public class ApplicationFrame extends JFrame implements PropertyChangeListener, 
 
             var id = (int) model.getDataVector().get(selectedRow).get(0);
 
-            Movie movie = MovieDialog.updateMovie(db, 24, 8, id);
+            Movie movie = MovieDialog.createMovie(db, 24, 8);
 
             if (movie != null) {
                 model.removeRow(selectedRow);
@@ -327,10 +327,9 @@ public class ApplicationFrame extends JFrame implements PropertyChangeListener, 
                         "IMDB: 30"
                 });
             }
-
-            System.out.println("id = " + id);
         });
 
+        // deletes a movie.
         delete.addActionListener(l -> {
             int selectedRow = moviesTableAdmin.getSelectedRow();
 
@@ -399,7 +398,7 @@ public class ApplicationFrame extends JFrame implements PropertyChangeListener, 
         }
 
         if (e.getSource() == newMovieMenuItem) {
-            var movie = MovieDialog.createMovie(db, 8, 24);
+            var movie = MovieDialog.createMovie(db, 24, 8);
 
             if (movie != null)
                 tableModels.get(Movie.class).addRow(new Object[]{

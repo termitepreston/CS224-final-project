@@ -53,16 +53,20 @@ public class Named {
                 insert into
                     %s (name)
                 values
-                    (?, ?)
+                    (?)
                 returning id;""".formatted(tableName);
 
         try (var conn = db.getConn();
-             var stat = conn.prepareStatement(insertStat);
-             var rs = stat.executeQuery()) {
+             var stat = conn.prepareStatement(insertStat)) {
 
-            rs.next();
+            stat.setString(1, name);
 
-            return new Named(rs.getInt(1), name);
+            try (var rs = stat.executeQuery()) {
+                rs.next();
+
+                return new Named(rs.getInt(1), name);
+
+            }
         }
     }
 

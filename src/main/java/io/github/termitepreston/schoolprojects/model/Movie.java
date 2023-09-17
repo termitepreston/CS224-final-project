@@ -107,7 +107,7 @@ public class Movie {
                 movie.setId(rs.getInt(1));
                 movie.setTitle(rs.getString(2));
                 movie.setYear(rs.getInt(3));
-                movie.setRuntime(rs.getTime(4).getMinutes());
+                movie.setRuntime(rs.getInt(4));
                 movie.setPlot(rs.getString(5));
                 movie.setAwards(rs.getString(6));
                 movie.setType(rs.getString(7));
@@ -490,7 +490,7 @@ public class Movie {
                 movie.setId(rs.getInt(1));
                 movie.setTitle(rs.getString(2));
                 movie.setYear(rs.getInt(3));
-                movie.setRuntime(rs.getTime(4).getMinutes());
+                movie.setRuntime(rs.getInt(4));
                 movie.setPlot(rs.getString(5));
                 movie.setAwards(rs.getString(6));
                 movie.setType(rs.getString(7));
